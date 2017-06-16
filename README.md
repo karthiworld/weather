@@ -1,0 +1,2 @@
+# weather
+A simple web application using HTML, CSS and JS to Get user location from browser and Embed google maps and show the location above on it with a marker Get the corresponding weather report for that location from openweathermap (use geographical coordinates). And displaying it below in the map and also make the location marker draggable and display the latest weather report of new marker location
