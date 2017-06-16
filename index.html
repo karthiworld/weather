@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Weather Report</title>
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<style type="text/css">
+  #mapCanvas {
+    width: 500px;
+    height: 400px;
+    float: left;
+  }
+  #infoPanel {
+    float: left;
+    margin-left: 10px;
+  }
+ div#openweathermap {
+  border: 1px solid;
+  text-align: center;
+  }
+  span#w_desc {
+    font-size: 36px;
+    margin-right: 20px;
+  }
+  #openweathermap{
+    display: none;
+  }
+</style>
+
+</head>
+
+<body>
+
+  <div id="mapCanvas"></div>
+
+  <div id="infoPanel">
+
+    <b>Current position:</b><br>
+
+    <div id="info">click 'ALLOW' to access your location.</div>
+
+    <div id="demo"></div><br>
+
+    <b>Weather Report:</b><br>
+
+    <div id="openweathermap">
+
+      <h1>Weather in <span id="w_country"></span></h1>
+
+      <div><img src="" id="w_icon" alt="Weather" width="50" height="50">  <span id='w_desc'></span></div>
+
+      <div>
+
+        <div style="width: 100%;" id="w_details">
+
+            <table  border="1"  style="width: 100%;height:auto">
+
+              <tbody>
+
+                <tr>
+                  <th>Wind</th>
+                  <td id="w_wind"></td>
+                </tr>
+
+                <tr>
+                  <th>Cloudiness</th>
+                  <td id="w_cloud"></td>
+                </tr>
+
+                <tr>
+                  <th>Pressure</th>
+                  <td id="w_pressure"></td>
+                </tr>
+
+                <tr>
+                  <th>Humidity</th>
+                  <td id="w_humidity"></td>
+                </tr>
+
+                <tr>
+                  <th>Sunrise</th>
+                  <td id="w_sunrise"></td>
+                </tr>
+
+                <tr>
+                  <th>Sunset</th>
+                  <td id="w_sunset"></td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+ </div>
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyCWDsib5jlmfOchcZGHJcbcj15mq9ylSHM&sensor=false"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+  var lat1, lon1 , geocoder = new google.maps.Geocoder();
+
+  getLocation();
+  
+  function getLocation(){ 
+
+    if(navigator.geolocation){
+
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+
+    }else{ 
+
+         document.getElementById('info').innerHTML = "Geolocation is 'not supported by this browser'";
+
+    }
+
+  }
+
+  function showPosition(position) {
+
+    lat1 =position.coords.latitude;
+
+    lon1 =position.coords.longitude;
+
+    initialize();
+
+  }
+
+  function showError(error) { 
+
+  document.getElementById('info').innerHTML = "Non secure http website Does not supporte Geolocation (or) click ALLOW to access your location";
+
+  }
+
+function updateMarkerPosition(latLng) { 
+
+  document.getElementById('info').innerHTML = [latLng.lat(),latLng.lng()].join(', ');    
+
+}
+
+function initialize() {
+  
+  var latLng = new google.maps.LatLng(lat1, lon1);
+
+  var map = new google.maps.Map(document.getElementById('mapCanvas'), {
+
+    zoom: 8,
+    center: latLng,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+
+  });
+
+  var marker = new google.maps.Marker({
+
+    position: latLng,
+    title: 'Point A',
+    map: map,
+    draggable: true
+
+  });
+  
+  getweather(lat1, lon1);
+
+  geocodePosition(latLng);
+  
+  updateMarkerPosition(latLng);
+
+function geocodePosition(pos) { 
+
+  getweather(pos.lat(),pos.lng());
+  
+  geocoder.geocode({
+  
+  latLng: pos
+
+  });
+  
+  }
+  
+  google.maps.event.addListener(marker, 'drag', function() {
+  
+    updateMarkerPosition(marker.getPosition());
+  
+  });
+
+  google.maps.event.addListener(marker, 'dragend', function() {
+  
+    geocodePosition(marker.getPosition());
+  
+  });
+
+  }
+  
+  function getweather(x,y){ 
+  
+  var weather1='http://api.openweathermap.org/data/2.5/weather?lat='+x+'&lon='+y+'&appid=cb63b5f1b9c40af880d8ba641e0dc210&units=metric';
+  
+  $.getJSON(weather1,function(data){
+  
+    document.getElementById('openweathermap').style.display="block";
+  
+    document.getElementById('w_country').innerHTML=data.sys.country;
+  
+    document.getElementById('w_desc').innerHTML=data.main.temp+" &#x2103;";
+  
+    document.getElementById('w_icon').src="http://openweathermap.org/img/w/"+data.weather[0].icon+".png";
+  
+    document.getElementById('w_wind').innerHTML=data.wind.speed;
+  
+    document.getElementById('w_cloud').innerHTML=data.weather[0].description;
+  
+    document.getElementById('w_pressure').innerHTML=data.main.pressure;
+  
+    document.getElementById('w_humidity').innerHTML=data.main.humidity;
+  
+    document.getElementById('w_sunrise').innerHTML=data.sys.sunrise;
+  
+    document.getElementById('w_sunset').innerHTML=data.sys.sunset;
+  
+    });
+  }
+
+</script>
+
+</body>
+
+</html>
